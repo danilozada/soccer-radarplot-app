@@ -5,8 +5,6 @@ import dash
 from dash import Dash, html, dcc, callback, Output, Input
 import plotly.express as px
 
-global_data = {}
-
 uniqueLeagues = ['ENG-Premier League', 'ESP-La Liga', 'FRA-Ligue 1',
        'GER-Bundesliga', 'ITA-Serie A']
 
@@ -14,47 +12,65 @@ def return_standard_dataframe(season):
     standard_df = sd.FBref(leagues="Big 5 European Leagues Combined", seasons=season, no_cache=True).read_player_season_stats('standard').reset_index()
     return(standard_df)
 
+def return_
+
+global_data = {}
 
 app = Dash(__name__)
 
-
 app.layout = html.Div([
+    html.H1('Radar Plot Generator', style = {'textAlign' : 'center'}),
     html.Div([
-        html.H1('Radar Plot Generator', style = {'textAlign' : 'center'}),
-        html.Div([
-            html.Label('Select a Season (for 2022-2023 season; select 2022)', 
-                        style = {
-                            'font-weight' : 'bold',
-                            'font-size' : '20px'            
-                }),
-            html.Div(
-                dcc.Dropdown(
-                    id = 'selectSeason',
-                    options = np.arange(2020, 2025, 1),
-                    value = '',
-                    placeholder = '',
-                    ), style = {
-                        'width' : '30%',})
-        ]),
-        html.Br(),
-        html.Label('Select a league', style = {
+        html.Label('Select a Radar Plot', style = {
                 'fontWeight' : 'bold',
                 'font-size' : '20px' 
                 }),
-            html.Div(
-                dcc.Dropdown(
-                    id = 'selectLeague',
-                    options = uniqueLeagues,
-                    placeholder = ''
-                ), style = {
-                    'width' : '30%'
-                }
-            )
-    ]),
-    html.Br(),
-    html.Button('Filter by This Season and League', id = 'szn_league_button', n_clicks = 0),
-    html.Div(id = 'league-inputs')
-], style = {'marginLeft' : '150px'})
+        dcc.RadioItems(['Single Player', 'Player Comparison'], 'Single Player', id = 'plot-type', inline=True)],
+        style = {'marginLeft' : '50px'}),
+        html.Br(),
+        html.Div(id = 'button-select')
+])
+
+@callback(
+    dash.dependencies.Output('button-select', 'children'),
+    dash.dependencies.Input('plot-type', 'value')
+)
+
+def create_dropdowns(num_player):
+    if num_player == 'Single Player':
+        return html.Div([
+            html.Div([
+                html.Label('Select a Season (ex. 22/23 season; select 2022)', 
+                            style = {
+                                'font-weight' : 'bold',
+                                'font-size' : '20px'            
+                    }),
+                html.Div(
+                    dcc.Dropdown(
+                        id = 'selectSeason',
+                        options = np.arange(2020, 2025, 1),
+                        value = 2024,
+                        ), style = {
+                            'width' : '30%',})
+            ]),
+            html.Br(),
+            html.Label('Select a league', style = {
+                    'fontWeight' : 'bold',
+                    'font-size' : '20px' 
+                    }),
+                html.Div(
+                    dcc.Dropdown(
+                        id = 'selectLeague',
+                        options = uniqueLeagues,
+                        value = 'ENG-Premier League'
+                    ), style = {
+                        'width' : '30%'
+                    }
+                ),
+            html.Br(),
+            html.Button('Filter by This Season and League', id = 'szn_league_button', n_clicks = 0),
+            html.Div(id = 'league-inputs')
+        ], style = {'marginLeft' : '50px'})
     
 @callback(
     dash.dependencies.Output('league-inputs', 'children'),
@@ -82,7 +98,7 @@ def season_league_clicker(n_clicks, szn, lg):
                 dcc.Dropdown(
                     id = 'selectTeam',
                     options = unique_teams,
-                    placeholder = ''
+                    value = unique_teams[1]
                 ), style = {
                     'width' : '30%'
                 }
@@ -96,7 +112,6 @@ def season_league_clicker(n_clicks, szn, lg):
     dash.dependencies.Output('team-output', 'children'),
     dash.dependencies.Input('team_button', 'n_clicks'),
     dash.dependencies.State('selectTeam', 'value')
-
 )
 
 def player_clicker(n_clicks, team):
@@ -142,11 +157,6 @@ def player_clicker(n_clicks, team):
     ])
 
 
-
-
-
-
-    
 
 
 if __name__ == '__main__':
