@@ -5,10 +5,9 @@ import dash
 from dash import Dash, html, dcc, callback, Output, Input
 import plotly.express as px
 
-global_data = {}
+df = pd.read_csv('radar_data.csv')
 
-uniqueLeagues = ['ENG-Premier League', 'ESP-La Liga', 'FRA-Ligue 1',
-       'GER-Bundesliga', 'ITA-Serie A']
+uniqueLeagues = df['league'].unique()
 
 def return_standard_dataframe(season):
     standard_df = sd.FBref(leagues="Big 5 European Leagues Combined", seasons=season, no_cache=True).read_player_season_stats('standard').reset_index()

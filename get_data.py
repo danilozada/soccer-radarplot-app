@@ -1,9 +1,13 @@
+# Libraries
 import pandas as pd
 import soccerdata as sd
 import numpy as np
+from functools import reduce
 
+# Seasons
 years = ['19-20', '20-21', '21-22', '22-23', '23-24', '24-25']
 
+# Standard data
 def get_standard_data(year):
     
     # Desired columns from standard data
@@ -29,6 +33,7 @@ def get_standard_data(year):
 
     return(standard_df)
 
+# Defense data
 def get_defense_data(year):
     
     # Desired columns from defensive data
@@ -58,6 +63,7 @@ def get_defense_data(year):
 
     return(defense_df)
 
+# SCA data
 def get_sca_data(year):
     
     # Desired columns from SCA data
@@ -81,6 +87,7 @@ def get_sca_data(year):
 
     return(sca_df)
 
+# Misc data
 def get_misc_data(year):
     
     # Desired columns from misc data
@@ -109,6 +116,7 @@ def get_misc_data(year):
 
     return(misc_df)
 
+# Pass data
 def get_pass_data(year):
     
     # Desired columns from pass data
@@ -139,6 +147,7 @@ def get_pass_data(year):
 
     return(pass_df)
 
+# Poss data
 def get_poss_data(year):
     
     # Desired columns from poss data
@@ -149,7 +158,7 @@ def get_poss_data(year):
     ('player', ''),
     ('Carries', 'PrgC'),
     ('Carries', 'CPA')
-]
+    ]
     
     # Get poss data
     poss_df = sd.FBref(leagues="Big 5 European Leagues Combined", seasons=year).read_player_season_stats('possession').reset_index()
@@ -163,6 +172,7 @@ def get_poss_data(year):
 
     return(poss_df)
 
+# Shot data
 def get_shot_data(year):
     
     # Desired columns from shooting data
@@ -175,7 +185,7 @@ def get_shot_data(year):
     ('Standard', 'Sh/90'),
     ('Expected', 'npxG/Sh'),
     ('Standard', 'Dist')
-]
+    ]
     
     # Get shooting data
     shot_df = sd.FBref(leagues="Big 5 European Leagues Combined", seasons=year).read_player_season_stats('shooting').reset_index()
@@ -189,16 +199,67 @@ def get_shot_data(year):
 
     return(shot_df)
 
-x = '19-20'
+# Combine all data frames
+def get_all_data(year):
+    year = year
+    standard_df = get_standard_data(year)
+    defense_df = get_defense_data(year)
+    sca_data = get_sca_data(year)
+    misc_data = get_misc_data(year)
+    pass_data = get_pass_data(year)
+    poss_data = get_poss_data(year)
+    shot_data = get_shot_data(year)
 
-df = get_standard_data(x)
-df.head()
-df.shape
+    all_data = [standard_df, defense_df, sca_data, misc_data, pass_data, poss_data, shot_data]
 
-# Standard - All 90's - drop GK
-# defense - clr, int, shots_blocked, tckl_int, tackles
-# sca - all 90's
-# misc - aerial_won, fls, fld, recov
-# pass - final_third, xAG, CrsPA, PPA, PrgP
-# poss - PrgC, CPA
-# shot - npxG - account for goalies having no xG
+    df = reduce(lambda left, right: pd.merge(left, right, on = ['league', 'season', 'team', 'player'],
+                                             how = 'outer'), all_data)
+    
+    df = df[df['pos'] != 'GK']
+    
+    return(df)
+
+# Create blank data frame to append to
+all_years_df = pd.DataFrame()
+
+# Loop for different years
+for year in years:
+    df = get_all_data(year)
+    all_years_df = pd.concat([all_years_df, df])
+    
+# Columns to normalize to 90 minute games
+columns_to_normalize = ['clearances', 'int', 'shots_blocked', 'tkl_int', 'tackles', 
+                        'aerial_won', 'fls', 'fld', 'recov', 'final_third', 'xAG', 
+                        'CrsPA', 'PPA', 'PrgP', 'PrgC', 'CPA', 'npxG']
+
+# Loop for normalize
+for c in columns_to_normalize:
+    all_years_df[c] = round(all_years_df[c] / all_years_df['90s'],2)
+
+# Fill NA with 0
+all_years_df = all_years_df.fillna(0)
+
+# Replace league and season
+
+# league
+new_leagues = {'ENG-Premier League' : 'English Premier League', 
+           'ESP-La Liga' : 'La Liga',
+           'FRA-Ligue 1' : 'Ligue 1',
+           'GER-Bundesliga' : 'German Bundesliga',
+           'ITA-Serie A' : 'Serie A'}
+all_years_df['league'] = all_years_df['league'].replace(new_leagues)
+
+# season
+new_seasons = {'1920' : '2019/2020', 
+               '2021' : '2020/2021', 
+               '2122' : '2021/2022', 
+               '2223' : '2022/2023', 
+               '2324' : '2023/2024', 
+               '2425' : '2024/2025'}
+
+all_years_df['season'] = all_years_df['season'].replace(new_seasons)
+
+all_years_df = all_years_df.reset_index(drop=True)
+
+# Create csv for app
+all_years_df.to_csv('radar_data.csv', index = False)
