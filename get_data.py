@@ -5,7 +5,7 @@ import numpy as np
 from functools import reduce
 
 # Seasons
-years = ['19-20', '20-21', '21-22', '22-23', '23-24', '24-25']
+years = ['20-21', '21-22', '22-23', '23-24', '24-25']
 
 # Standard data
 def get_standard_data(year):
@@ -250,7 +250,7 @@ new_leagues = {'ENG-Premier League' : 'English Premier League',
 all_years_df['league'] = all_years_df['league'].replace(new_leagues)
 
 # season
-new_seasons = {'1920' : '2019/2020', 
+new_seasons = {
                '2021' : '2020/2021', 
                '2122' : '2021/2022', 
                '2223' : '2022/2023', 
@@ -259,7 +259,21 @@ new_seasons = {'1920' : '2019/2020',
 
 all_years_df['season'] = all_years_df['season'].replace(new_seasons)
 
+new_columns = ['league', 'season', 'team', 'pos', 'player', 'age', 'matches', '90s',
+       'Clearances', "% of Dribblers Tackled", 'Interceptions', 
+       'Shots Blocked', 'Tackles & Interceptions',
+       'Tackles', 'Shot Creating Actions', 'Aerial Duels Won', 
+       'Aerial Win %', 'Fouls', 'Fouls Drawn', 'Ball Recoveries',
+       'Pass Completion %', 'Long Pass Completion %', 'Completed Final Third Passes', 
+       'Expected Assisted Goals', 'Crosses into Penalty Area', 'Passes into Penalty Area',
+       'Progressive Passes', 'Progressive Carries', 'Carries into Penalty Area', 
+       'npxG', 'Shots', 'npxG/Shot', 'Shot Distance (Yards)']
+
+all_years_df.columns = new_columns
+
 all_years_df = all_years_df.reset_index(drop=True)
+all_data = all_years_df.fillna(0)
+all_data.fillna(0, inplace =True)
 
 # Create csv for app
-all_years_df.to_csv('radar_data.csv', index = False)
+all_data.to_csv('radar_data.csv', index = False)
