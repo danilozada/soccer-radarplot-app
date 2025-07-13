@@ -16,7 +16,8 @@ def get_params(radartype):
                 'Completed Final Third Passes', "% of Dribblers Tackled",
                 'Interceptions', 'Shots Blocked', 'Clearances', 'Fouls']
         lower_is_better = ['Fouls']
-        radar_position = 'Centerback'    
+        radar_position = 'Centerback'
+        position = 'DF'    
     if radartype == 'Fullback':
         params = ["% of Dribblers Tackled", 'Progressive Carries', 'Completed Final Third Passes',
           'Crosses into Penalty Area', 'Expected Assisted Goals',
@@ -24,6 +25,7 @@ def get_params(radartype):
           'Tackles & Interceptions']
         lower_is_better = ['Fouls']
         radar_position = 'Fullback'
+        position = 'DF'
     if radartype == 'Midfielder':
         params = ['Pass Completion %', 'Progressive Carries', "Progressive Passes",
                   'Expected Assisted Goals', 'Completed Final Third Passes', 
@@ -31,6 +33,7 @@ def get_params(radartype):
                   'Interceptions', 'Tackles', "% of Dribblers Tackled"] 
         lower_is_better = ['Fouls']
         radar_position = 'Midfielder'
+        position = 'MF'
     if radartype == 'Winger/CAM':
         params = ["npxG", "npxG/Shot", "Fouls Drawn", 'Tackles & Interceptions',
           'Expected Assisted Goals', "Passes into Penalty Area", 'Progressive Carries',
@@ -38,6 +41,7 @@ def get_params(radartype):
           "Shots"]
         lower_is_better = ["Shot Distance (Yards)"]
         radar_position = 'Attacking Midfielder/Winger'
+        position = 'MF'
     if radartype == 'Striker':
         params = ["npxG", "Shots", "Shot Distance (Yards)", "Shot Creating Actions",
                   'Expected Assisted Goals', 'Carries into Penalty Area', 
@@ -45,13 +49,15 @@ def get_params(radartype):
                   'Progressive Carries', 'npxG/Shot']
         lower_is_better = ["Shot Distance (Yards)"]
         radar_position = 'Striker'
+        position = 'FW'
 
-    return params, lower_is_better, radar_position
+    return params, lower_is_better, radar_position, position
 
-def get_percentiles(df, params):
+def get_percentiles(df, params, position):
     params = params
     low_vals = []
     high_vals = []
+    df = df[df['pos'].str.contains(position)]
     for p in params:
         vals = df.loc[(df['90s'] >= 20), p].values
         low_perc = float(round(np.percentile(vals, 5),2))
@@ -150,8 +156,8 @@ def second_player_header(axs, name_age_str, team, league_season_str, game_time_a
 
 def single_player_plot(df, season, league, team, player, radartype):
     
-    params, lower_is_better, radar_position = get_params(radartype)
-    low_vals, high_vals = get_percentiles(df, params)
+    params, lower_is_better, radar_position, position = get_params(radartype)
+    low_vals, high_vals = get_percentiles(df, params, position)
     player_data = get_player_data(df, season, league, team, player)
 
     player_age_str, league_season_str, game_time_appearances_str = get_single_player_radar_info(player_data, league, season)
@@ -180,8 +186,8 @@ def single_player_plot(df, season, league, team, player, radartype):
 def two_player_plot(df, first_season, first_league, first_team, first_player,
                     second_season, second_league, second_team, second_player, radartype):
     
-    params, lower_is_better, radar_position = get_params(radartype)
-    low_vals, high_vals = get_percentiles(df, params)
+    params, lower_is_better, radar_position, position = get_params(radartype)
+    low_vals, high_vals = get_percentiles(df, params, position)
     
     first_player_data = get_player_data(df, first_season, first_league, first_team, first_player)
     second_player_data = get_player_data(df, second_season, second_league, second_team, second_player)
