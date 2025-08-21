@@ -1,5 +1,7 @@
 # Overview
-This is a deployable, interactive, web browser app to create radar plots, popularized by Statsbomb. There are two options of plots - a single player, and a player comparison. Players can be selected from the top 5 European leagues with seasons spanning back to 2020/2021. 5 positions can be selected from: centerback, fullback, midfielder, attacking midfielder/winger, and striker. Player comparison plots also allow you to compare players to themselves from previous seasons, as well as different players across different seasons. The radar plot minimum and maximum values are the 5th and 95th percentiles respectively, across all 5 leagues since the 2020/2021 season, across specified position. Data is from Fbref and acquired using soccerdata package; radar plots are created using mplsoccer.
+Link to app: https://soccer-radarplot-app.onrender.com/
+
+This is an interactive web browser app to create radar plots, popularized by Statsbomb. There are two options of plots - a single player, and a player comparison. Players can be selected from the top 5 European leagues with seasons spanning from 2020/2021 to 2024/2025. 5 positions can be selected from: centerback, fullback, midfielder, attacking midfielder/winger, and striker. Player comparison plots also allow you to compare players to themselves from previous seasons, as well as different players across different seasons. The radar plot minimum and maximum values are the 5th and 95th percentiles respectively, across all 5 leagues since the 2020/2021 season, across specified position. Data is from Fbref and acquired using soccerdata package; radar plots are created using mplsoccer.
 
 # Individual scripts
 Below is a breakdown of the individual scripts and the part they play in the app:
@@ -10,4 +12,6 @@ radar_function.py: Uses mplsoccer to create functions that will create the singl
 
 create_data_dict.py: Uses data csv file to create dictionary of seasons, leagues, teams, and players that can be used for dropdown bars in app.
 
-app.py: Creates app.
+app.py: Script for app
+
+render.yaml: Used for rendering.
